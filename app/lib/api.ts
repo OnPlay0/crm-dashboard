@@ -1,6 +1,32 @@
 // src/app/lib/api.ts
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+export const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
+export function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem("accessToken");
+  return token
+    ? {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    : {
+        "Content-Type": "application/json",
+      };
+}
+
+// 🔐 Verificación global de sesión expirada o rechazada
+async function handleAuthError(res: Response) {
+  if (res.status === 401 || res.status === 403) {
+    localStorage.clear();
+    alert(
+      "⏳ Tu sesión ha expirado o fue revocada. Por favor, iniciá sesión nuevamente."
+    );
+    window.location.href = "/login";
+    throw new Error("Sesión inválida o expirada.");
+  }
+}
+
+// 🔍 GET
 export async function fetchData(endpoint: string) {
   const cleanedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   const url = `${BASE_URL}${cleanedEndpoint}`;
@@ -8,11 +34,10 @@ export async function fetchData(endpoint: string) {
 
   const res = await fetch(url, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
+    headers: getAuthHeaders(),
   });
+
+  await handleAuthError(res);
 
   if (!res.ok) {
     throw new Error(`Error HTTP: ${res.status} - ${res.statusText}`);
@@ -21,15 +46,20 @@ export async function fetchData(endpoint: string) {
   return res.json();
 }
 
+// ➕ POST
 export const postData = async (endpoint: string, data: any) => {
   const url = `${BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
   console.log("Posting to:", url);
   console.log("📦 Payload que se va a enviar:", data);
+
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
+
+  await handleAuthError(res);
+
   if (!res.ok) {
     const errorText = await res.text();
     console.error("❌ Error detalle del backend:", errorText);
@@ -45,19 +75,25 @@ export const postData = async (endpoint: string, data: any) => {
   return res.json();
 };
 
+// ✏️ PUT
 export const putData = async (endpoint: string, data: any) => {
   const url = `${BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
   const res = await fetch(url, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
+
+  await handleAuthError(res);
+
   if (!res.ok) {
     throw new Error(`Error al actualizar: ${res.status} ${res.statusText}`);
   }
+
   return res.json();
 };
 
+// 🗑️ DELETE
 export const deleteData = async (endpoint: string) => {
   const cleanedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   const url = `${BASE_URL}${cleanedEndpoint}`;
@@ -65,7 +101,10 @@ export const deleteData = async (endpoint: string) => {
 
   const res = await fetch(url, {
     method: "DELETE",
+    headers: getAuthHeaders(),
   });
+
+  await handleAuthError(res);
 
   if (!res.ok) {
     throw new Error(`Error al eliminar: ${res.status} ${res.statusText}`);

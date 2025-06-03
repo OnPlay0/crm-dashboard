@@ -6,25 +6,49 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Save, ArrowLeft } from "lucide-react";
+import { Venta } from "@/app/lib/types";
 
-export function SaleForm({ onClose, onSave, editData }: any) {
+interface SaleFormProps {
+  onClose: () => void;
+  onSave: (venta: Venta) => void;
+  editData: Venta | null;
+}
+
+export function SaleForm({ onClose, onSave, editData }: SaleFormProps) {
   const [form, setForm] = useState({
     cliente: editData?.cliente || "",
-    producto: editData?.producto || "",
-    monto: editData?.monto || "",
-    fecha: editData?.fecha || "",
-    estado: editData?.estado || "PENDIENTE",
-    notas: editData?.notas || "",
+    descripcion: editData?.descripcion || "",
+    monto: editData?.monto?.toString() || "",
+    estado: editData?.estado || "NUEVO",
+    fechaCierreEstimada: editData?.fechaCierreEstimada || "",
   });
 
-  const handleChange = (e: any) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(form);
+
+    const montoNumerico = parseFloat(form.monto);
+
+    if (isNaN(montoNumerico) || montoNumerico <= 0) {
+      alert("Por favor ingresá un monto válido mayor a 0.");
+      return;
+    }
+
+    onSave({
+      ...form,
+      monto: montoNumerico,
+    });
   };
 
   return (
@@ -50,11 +74,12 @@ export function SaleForm({ onClose, onSave, editData }: any) {
           />
         </div>
         <div>
-          <Label>Producto</Label>
-          <Input
-            name="producto"
-            value={form.producto}
+          <Label>Descripción</Label>
+          <Textarea
+            name="descripcion"
+            value={form.descripcion}
             onChange={handleChange}
+            rows={3}
             required
           />
         </div>
@@ -66,16 +91,8 @@ export function SaleForm({ onClose, onSave, editData }: any) {
             value={form.monto}
             onChange={handleChange}
             required
-          />
-        </div>
-        <div>
-          <Label>Fecha</Label>
-          <Input
-            name="fecha"
-            type="date"
-            value={form.fecha}
-            onChange={handleChange}
-            required
+            min="0.01"
+            step="0.01"
           />
         </div>
         <div>
@@ -85,21 +102,25 @@ export function SaleForm({ onClose, onSave, editData }: any) {
             value={form.estado}
             onChange={handleChange}
             className="w-full border p-2 rounded-md"
+            required
           >
-            <option value="PENDIENTE">Pendiente</option>
-            <option value="COMPLETADA">Completada</option>
-            <option value="CANCELADA">Cancelada</option>
+            <option value="NUEVO">Nuevo</option>
+            <option value="EN_PROCESO">En proceso</option>
+            <option value="GANADO">Ganado</option>
+            <option value="PERDIDO">Perdido</option>
           </select>
         </div>
-        <div className="md:col-span-2">
-          <Label>Notas</Label>
-          <Textarea
-            name="notas"
-            value={form.notas}
+        <div>
+          <Label>Fecha de cierre estimada</Label>
+          <Input
+            name="fechaCierreEstimada"
+            type="date"
+            value={form.fechaCierreEstimada}
             onChange={handleChange}
-            rows={4}
+            required
           />
         </div>
+
         <div className="md:col-span-2 flex justify-end gap-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancelar

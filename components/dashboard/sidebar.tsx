@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -14,20 +13,31 @@ import {
   LifeBuoy,
   LogOut,
 } from "lucide-react";
-
+import Image from "next/image";
+import { logoutUser } from "@/app/lib/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
   const pathname = usePathname();
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    setRole(storedRole);
+  }, []);
 
   return (
     <div className="hidden border-r bg-muted/40 lg:block lg:w-64">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <BarChart3 className="h-6 w-6" />
-            <span className="text-lg font-bold">CRM Dashboard</span>
+            <Image
+              src="ovelinkfondo.png"
+              alt="Logo Ovelink"
+              width={120}
+              height={40}
+            />
           </Link>
         </div>
         <div className="flex-1 overflow-auto py-2">
@@ -53,7 +63,7 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
               Clientes
             </Link>
             <Link
-              href="/ventas" // ✅ Cambiado
+              href="/ventas"
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
                 pathname === "/ventas" && "bg-muted text-primary"
@@ -72,16 +82,21 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
               <UserPlus className="h-4 w-4" />
               Leads
             </Link>
-            <Link
-              href="/users"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                pathname === "/users" && "bg-muted text-primary"
-              )}
-            >
-              <Users className="h-4 w-4" />
-              Usuarios
-            </Link>
+
+            {/* ✅ Mostrar solo si el rol es ADMIN */}
+            {role === "ROLE_ADMIN" && (
+              <Link
+                href="/users"
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                  pathname === "/users" && "bg-muted text-primary"
+                )}
+              >
+                <Users className="h-4 w-4" />
+                Usuarios
+              </Link>
+            )}
+
             <Link
               href="/services"
               className={cn(
@@ -116,9 +131,13 @@ export function Sidebar({ className }: React.HTMLAttributes<HTMLDivElement>) {
               <LifeBuoy className="h-4 w-4" />
               Ayuda
             </Link>
-            <Button variant="outline" className="justify-start gap-3">
+            <Button
+              onClick={logoutUser}
+              variant="ghost"
+              className="flex items-center gap-3 w-full justify-start text-muted-foreground hover:text-primary"
+            >
               <LogOut className="h-4 w-4" />
-              Cerrar Sesión
+              Cerrar sesión
             </Button>
           </nav>
         </div>

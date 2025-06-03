@@ -6,7 +6,7 @@ import { getServicios, deleteServicio } from "@/app/lib/servicios";
 import { ServiceForm } from "@/components/service-form";
 import { ServicesTable } from "@/components/services-table";
 
-export default function ServicesPage() {
+export default function ServiciosSection() {
   const [servicios, setServicios] = useState<Servicio[]>([]);
   const [editData, setEditData] = useState<Servicio | null>(null);
   const [showForm, setShowForm] = useState(false);

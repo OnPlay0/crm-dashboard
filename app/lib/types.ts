@@ -1,5 +1,6 @@
 // src/app/lib/types.ts
-// TIPOS DE LA PAGINA CLIENTE 
+
+// TIPOS DE LA PAGINA CLIENTE
 export enum EstadoCliente {
   PROSPECTO = "PROSPECTO",
   ACTIVO = "ACTIVO",
@@ -16,8 +17,6 @@ export interface Cliente {
   direccion: string;
   estado: EstadoCliente;
 }
-
-
 
 // TIPOS DE LA PAGINA LEAD
 export interface Lead {
@@ -38,7 +37,7 @@ export enum FuenteLead {
   LLAMADA = "LLAMADA",
   EMAIL = "EMAIL",
   EVENTO = "EVENTO",
-  OTRO = "OTRO"
+  OTRO = "OTRO",
 }
 
 export enum EstadoLead {
@@ -46,10 +45,10 @@ export enum EstadoLead {
   EN_PROCESO = "EN_PROCESO",
   CONTACTADO = "CONTACTADO",
   CALIFICADO = "CALIFICADO",
-  DESCARTADO = "DESCARTADO"
+  DESCARTADO = "DESCARTADO",
 }
 
-// TIPOS DE LA PAGINA SERVICIOS 
+// TIPOS DE LA PAGINA SERVICIOS
 export interface Servicio {
   id: number;
   nombre: string;
@@ -57,15 +56,37 @@ export interface Servicio {
   precio: number;
 }
 
-//TIPOS DE LA PAGINA VENTAS
-type Venta = {
+// TIPOS DE LA PAGINA VENTAS
+export interface Venta {
   id?: number;
   cliente: string;
-  producto: string;
+  descripcion: string;
   monto: number;
-  fecha: string;
-  estado: string;
-  notas?: string;
-};
+  estado: "NUEVO" | "EN_PROCESO" | "GANADO" | "PERDIDO";
+  fechaCierreEstimada: string;
+  fecha?: string;
+}
 
+// Enum de roles posibles
+export type Rol = "ROLE_ADMIN" | "ROLE_USER" | "ROLE_INVITED";
 
+// Usuario recibido desde el backend
+export interface Usuario {
+  id: number;
+  username: string;
+  email: string;
+  password: string;
+  role: {
+    id: number;
+    name: Rol; // acá usamos el tipo Rol como string
+  };
+}
+
+// Usuario que estamos creando desde el form (sin objeto `role`, solo el string)
+export interface UsuarioForm {
+  id?: number;
+  username: string;
+  email: string;
+  password: string;
+  role: Rol;
+}

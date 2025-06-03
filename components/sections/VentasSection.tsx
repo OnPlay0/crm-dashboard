@@ -1,3 +1,4 @@
+// src/app/(dashboard)/ventas/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,18 +7,11 @@ import { SalesTable } from "@/components/sales-table";
 import { SaleForm } from "@/components/sale-form";
 import { getVentas, createVenta, updateVenta } from "@/app/lib/ventas";
 import { Plus } from "lucide-react";
+import { Venta } from "@/app/lib/types";
 
-type Venta = {
-  id?: number;
-  cliente: string;
-  producto: string;
-  monto: number;
-  fecha: string;
-  estado: string;
-  notas?: string;
-};
 
-export default function VentasPage() {
+
+export default function VentasSection() {
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editData, setEditData] = useState<Venta | null>(null);
@@ -27,7 +21,7 @@ export default function VentasPage() {
       const data = await getVentas();
       setVentas(data);
     } catch (err) {
-      console.error("Error al obtener ventas", err);
+      console.error("❌ Error al obtener ventas:", err);
     }
   };
 
@@ -47,15 +41,27 @@ export default function VentasPage() {
 
   const handleSave = async (ventaData: Venta) => {
     try {
+      const fechaValida =
+        ventaData.fecha && !isNaN(new Date(ventaData.fecha).getTime())
+          ? ventaData.fecha
+          : new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+      const data: Venta = {
+        ...ventaData,
+        fecha: fechaValida,
+        monto: Number(ventaData.monto),
+      };
+
       if (ventaData.id) {
-        await updateVenta(ventaData.id, ventaData);
+        await updateVenta(ventaData.id, data);
       } else {
-        await createVenta(ventaData);
+        await createVenta(data);
       }
+
       setShowForm(false);
       fetchVentas();
     } catch (err) {
-      console.error("Error al guardar venta", err);
+      console.error("❌ Error al guardar venta:", err);
     }
   };
 
@@ -76,7 +82,11 @@ export default function VentasPage() {
           onSave={handleSave}
         />
       ) : (
-        <SalesTable data={ventas} onEdit={handleEdit} />
+        <SalesTable
+          data={ventas}
+          onEdit={handleEdit}
+          onCreateNew={handleCreateNew}
+        />
       )}
     </div>
   );

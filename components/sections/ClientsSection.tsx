@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { ClientForm } from "@/components/client-form";
 import { ClientsTable } from "@/components/clients-table";
 import { getClients } from "@/app/lib/cliente";
-import { Cliente } from "@/app/lib/types";
+
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-export default function ClientsPage() {
+import { Cliente } from "@/app/lib/types";
+
+export default function ClientsSection() {
   const [clients, setClients] = useState<Cliente[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editData, setEditData] = useState<Cliente | null>(null);
@@ -47,7 +49,6 @@ export default function ClientsPage() {
           </Button>
         )}
       </div>
-
       {showForm ? (
         <ClientForm
           onClose={() => setShowForm(false)}

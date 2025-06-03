@@ -20,7 +20,9 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreHorizontal,
+  Search,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Lead } from "@/app/lib/types";
 
 interface LeadsTableProps {
@@ -100,6 +102,17 @@ export function LeadsTable({ leads, onEdit, onDelete }: LeadsTableProps) {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Filtrar leads..."
+          className="w-full max-w-sm"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -142,7 +155,6 @@ export function LeadsTable({ leads, onEdit, onDelete }: LeadsTableProps) {
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Abrir menú</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">

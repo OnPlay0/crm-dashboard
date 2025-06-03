@@ -1,6 +1,7 @@
+// src/components/sales-table.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -23,41 +24,28 @@ import {
   MoreHorizontal,
   Search,
 } from "lucide-react";
-import { getVentas, deleteVenta } from "@/app/lib/ventas";
+import { deleteVenta } from "@/app/lib/ventas";
+import { Venta } from "@/app/lib/types";
 
-type Venta = {
-  id: number;
-  cliente: string;
-  producto: string;
-  monto: number;
-  fecha: string;
-  estado: string;
-  notas?: string;
-};
+interface SalesTableProps {
+  data: Venta[];
+  onEdit: (venta: Venta) => void;
+  onCreateNew?: () => void;
+}
 
-export function SalesTable({ onEdit }: { onEdit: (venta: Venta) => void }) {
-  const [sales, setSales] = useState<Venta[]>([]);
+export function SalesTable({ data, onEdit }: SalesTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    fetchVentas();
-  }, []);
-
-  const fetchVentas = async () => {
-    const data = await getVentas();
-    setSales(data);
-  };
 
   const handleDelete = async (id: number) => {
     if (!confirm("¿Seguro que deseas eliminar esta venta?")) return;
     await deleteVenta(id);
-    fetchVentas();
+    // El padre debe volver a hacer fetch luego de borrar
   };
 
-  const filteredSales = sales.filter(
+  const filteredSales = data.filter(
     (sale) =>
       sale.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sale.producto.toLowerCase().includes(searchTerm.toLowerCase())
+      sale.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatCurrency = (amount: number) =>
@@ -117,7 +105,7 @@ export function SalesTable({ onEdit }: { onEdit: (venta: Venta) => void }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Cliente</TableHead>
+              <TableHead>Nombre</TableHead>
               <TableHead>Producto</TableHead>
               <TableHead>Monto</TableHead>
               <TableHead>Fecha</TableHead>
@@ -136,9 +124,9 @@ export function SalesTable({ onEdit }: { onEdit: (venta: Venta) => void }) {
               filteredSales.map((sale) => (
                 <TableRow key={sale.id}>
                   <TableCell>{sale.cliente}</TableCell>
-                  <TableCell>{sale.producto}</TableCell>
+                  <TableCell>{sale.descripcion}</TableCell>
                   <TableCell>{formatCurrency(sale.monto)}</TableCell>
-                  <TableCell>{formatDate(sale.fecha)}</TableCell>
+                  <TableCell>{formatDate(sale.fechaCierreEstimada)}</TableCell>
                   <TableCell>
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getEstadoColor(
@@ -160,7 +148,9 @@ export function SalesTable({ onEdit }: { onEdit: (venta: Venta) => void }) {
                         <DropdownMenuItem onClick={() => onEdit(sale)}>
                           Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(sale.id)}>
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(sale.id!)}
+                        >
                           Eliminar
                         </DropdownMenuItem>
                       </DropdownMenuContent>
