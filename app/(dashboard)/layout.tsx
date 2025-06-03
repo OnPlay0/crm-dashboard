@@ -1,6 +1,7 @@
 "use client";
 
 import "@/app/globals.css";
+
 import { Inter } from "next/font/google";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Providers } from "@/components/providers";

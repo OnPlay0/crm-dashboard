@@ -1,9 +1,12 @@
 "use client";
 
 import { loginRequest } from "@/app/lib/login";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
-export async function handleGuestLogin(router: AppRouterInstance) {
+import { useRouter } from "next/navigation";
+
+export type Router = ReturnType<typeof useRouter>;
+
+export async function handleGuestLogin(router: Router) {
   try {
     await loginRequest("invitado", "123", router); // ✅ ahora pasamos el router
   } catch (error) {

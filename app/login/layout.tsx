@@ -1,30 +1,24 @@
-import "@/app/globals.css";
+// app/login/layout.tsx
 import { Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
+import "@/app/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "CRM",
-  description: "Dashboard CRM multitenant",
+  title: "Login - Ovelink CRM",
+  description: "Pantalla de acceso al CRM multitenant",
 };
 
-export default function RootLayout({
+export default function LoginLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <html lang="es">
-      <body className={inter.className}>
-        <Providers
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </Providers>
+      <body className={`bg-background text-foreground ${inter.className}`}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
