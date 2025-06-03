@@ -17,7 +17,7 @@ export default function LoginLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`bg-background text-foreground ${inter.className}`}>
+      <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>
     </html>
