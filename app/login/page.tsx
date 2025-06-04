@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginRequest } from "@/app/lib/login";
+import { useLogin } from "@/app/lib/login";
 import Image from "next/image";
 import { handleGuestLogin } from "@/app/login/handle";
 
@@ -10,15 +10,16 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
   const router = useRouter();
+  const { loginRequest } = useLogin(); // ✅ Usás el hook para obtener la función
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
-    setErrorMessage(""); // Limpia error anterior
+    setErrorMessage("");
 
     try {
-      await loginRequest(username, password);
-      router.push("/");
+      await loginRequest(username, password); // ✅ Llamás a loginRequest, no al hook
     } catch (error: any) {
       setErrorMessage("Usuario o contraseña incorrectos");
       console.error(error.message);
@@ -27,7 +28,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      // Opcional: lógica para expiración
+      // lógica opcional
     }, 2000);
     return () => clearTimeout(timeout);
   }, []);

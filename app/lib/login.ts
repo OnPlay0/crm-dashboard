@@ -1,5 +1,7 @@
+"use client";
+
 import { decodeJwt } from "./auth";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useRouter } from "next/navigation";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
@@ -10,48 +12,48 @@ interface LoginResponse {
   role: string;
 }
 
-export async function loginRequest(
-  username: string,
-  password: string,
-  router?: AppRouterInstance // 👈 opcional para redirigir desde acá
-): Promise<void> {
-  const response = await fetch(`${BASE_URL}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
+export function useLogin() {
+  const router = useRouter();
 
-  if (!response.ok) {
-    const error = await response.text();
-    console.error("❌ Error al loguear:", error);
-    throw new Error("Credenciales inválidas");
-  }
+  const loginRequest = async (
+    username: string,
+    password: string
+  ): Promise<void> => {
+    const response = await fetch(`${BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
 
-  let json: any;
-  try {
-    json = await response.json();
-  } catch (e) {
-    console.error("❌ Error al parsear respuesta:", e);
-    throw new Error("Respuesta inválida del servidor");
-  }
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("❌ Error al loguear:", error);
+      throw new Error("Credenciales inválidas");
+    }
 
-  const token = json.accessToken;
-  if (!token) {
-    throw new Error("No se recibió token");
-  }
+    let json: LoginResponse;
+    try {
+      json = await response.json();
+    } catch (e) {
+      console.error("❌ Error al parsear respuesta:", e);
+      throw new Error("Respuesta inválida del servidor");
+    }
 
-  const decoded = decodeJwt(token);
-  console.log("🎯 Decodificado JWT:", decoded);
+    const token = json.accessToken;
+    if (!token) {
+      throw new Error("No se recibió token");
+    }
 
-  localStorage.setItem("accessToken", token);
-  localStorage.setItem("username", decoded.sub ?? "");
-  localStorage.setItem("userId", decoded.userId ?? "");
-  localStorage.setItem("role", decoded.role ?? "");
+    const decoded = decodeJwt(token);
+    console.log("🎯 Decodificado JWT:", decoded);
 
-  // ✅ Redirección al final, después de guardar todo
-  if (router) {
+    localStorage.setItem("accessToken", token);
+    localStorage.setItem("username", decoded.sub ?? "");
+    localStorage.setItem("userId", decoded.userId ?? "");
+    localStorage.setItem("role", decoded.role ?? "");
+
     router.push("/");
-  } else {
-    window.location.href = "/";
-  }
+  };
+
+  return { loginRequest };
 }
