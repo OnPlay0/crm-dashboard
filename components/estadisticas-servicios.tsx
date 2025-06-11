@@ -11,7 +11,7 @@ export function EstadisticaServicios() {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
-    fetchData("servicios/count")
+    fetchData<number>("servicios/count") // ← Aquí le dices que T = number
       .then(setTotal)
       .catch((err) =>
         console.error("Error al obtener total de servicios:", err)

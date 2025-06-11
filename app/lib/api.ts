@@ -1,4 +1,3 @@
-// src/app/lib/api.ts
 export const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
@@ -13,7 +12,6 @@ export function getAuthHeaders(): HeadersInit {
         "Content-Type": "application/json",
       };
 }
-
 // 🔐 Verificación global de sesión expirada o rechazada
 async function handleAuthError(res: Response) {
   if (res.status === 401 || res.status === 403) {
@@ -27,16 +25,25 @@ async function handleAuthError(res: Response) {
 }
 
 // 🔍 GET
-export async function fetchData(endpoint: string) {
+export async function fetchData<T>(endpoint: string): Promise<T> {
+  // 1) Guardia: si no hay token, aborta aquí
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    return Promise.reject("No autenticado");
+  }
+
+  // 2) Construcción de URL
   const cleanedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   const url = `${BASE_URL}${cleanedEndpoint}`;
   console.log("➡️ URL que se va a fetch:", url);
 
+  // 3) Llamada con headers ya incluyendo Authorization
   const res = await fetch(url, {
     method: "GET",
     headers: getAuthHeaders(),
   });
 
+  // 4) Manejo de 401/403
   await handleAuthError(res);
 
   if (!res.ok) {

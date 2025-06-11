@@ -11,7 +11,7 @@ export function EstadisticaClientes() {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
-    fetchData("clientes/count")
+    fetchData<number>("clientes/count")
       .then(setTotal)
       .catch((err) =>
         console.error("Error al obtener total de clientes:", err)

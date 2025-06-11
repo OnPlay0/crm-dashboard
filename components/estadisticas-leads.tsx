@@ -11,7 +11,7 @@ export function EstadisticaLeads() {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
-    fetchData("leads/count")
+    fetchData<number>("leads/count")
       .then(setTotal)
       .catch((err) => console.error("Error al obtener total de leads:", err));
   }, []);
