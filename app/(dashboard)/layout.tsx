@@ -1,29 +1,30 @@
+// app/(dashboard)/layout.tsx
 "use client";
-
 import "@/app/globals.css";
-
-import { Inter } from "next/font/google";
 import { Sidebar } from "@/components/dashboard/sidebar";
-import { Providers } from "@/components/providers";
-
-const inter = Inter({ subsets: ["latin"] });
-
+import { DashboardHeader } from "@/components/dashboard-header";
+import { EstadisticaVentasMensuales } from "@/components/estadisticas-ventas";
+import { EstadisticaClientes } from "@/components/estadisticas-cliente";
+import { EstadisticaLeads } from "@/components/estadisticas-leads";
+import { EstadisticaServicios } from "@/components/estadisticas-servicios";
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <Providers
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="flex-1">{children}</div>
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <div className="flex-1 p-6">
+        <DashboardHeader />
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <EstadisticaClientes />
+          <EstadisticaLeads />
+          <EstadisticaServicios />
+          <EstadisticaVentasMensuales />
+        </div>
+        {children}
       </div>
-    </Providers>
+    </div>
   );
 }

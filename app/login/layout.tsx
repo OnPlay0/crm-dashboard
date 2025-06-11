@@ -15,5 +15,6 @@ export default function LoginLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Solo el formulario de login, sin sidebar, sin header, sin estadísticas.
   return <>{children}</>;
 }

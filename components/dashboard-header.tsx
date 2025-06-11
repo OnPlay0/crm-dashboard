@@ -11,11 +11,8 @@ import {
 
 import { logoutUser } from "@/app/lib/auth";
 
-interface DashboardHeaderProps {
-  activeTab: string;
-}
-
-export function DashboardHeader({ activeTab }: DashboardHeaderProps) {
+// Eliminado el prop activeTab pues no se utiliza dentro del componente
+export function DashboardHeader() {
   const username =
     typeof window !== "undefined" ? localStorage.getItem("username") : "";
 
