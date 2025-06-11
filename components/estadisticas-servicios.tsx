@@ -9,6 +9,8 @@ export function EstadisticaServicios() {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
     fetchData("servicios/count")
       .then(setTotal)
       .catch((err) =>

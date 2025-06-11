@@ -11,6 +11,8 @@ export function EstadisticaVentasMensuales() {
   const [isPositive, setIsPositive] = useState(true);
 
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
     async function fetchVentas() {
       try {
         const resumen = await getVentasMensuales();
