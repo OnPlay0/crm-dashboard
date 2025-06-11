@@ -1,15 +1,15 @@
 // app/(dashboard)/layout.tsx
 "use client";
-import "@/app/globals.css";
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import "@/app/globals.css";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { EstadisticaVentasMensuales } from "@/components/estadisticas-ventas";
 import { EstadisticaClientes } from "@/components/estadisticas-cliente";
 import { EstadisticaLeads } from "@/components/estadisticas-leads";
 import { EstadisticaServicios } from "@/components/estadisticas-servicios";
+import { EstadisticaVentasMensuales } from "@/components/estadisticas-ventas";
 
 export default function DashboardLayout({
   children,
@@ -17,24 +17,26 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [ready, setReady] = useState(false);
+  const [authState, setAuthState] = useState<"loading" | "ok">("loading");
 
+  // Correr solo una vez al montar
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      // Si no hay token, redirige directamente al login
+      // Sin token, redirige inmediatamente
       router.replace("/login");
-      return;
+    } else {
+      // Con token, habilitamos el renderizado
+      setAuthState("ok");
     }
-    // Sólo cuando confirmamos que hay token, marcamos listo
-    setReady(true);
   }, [router]);
 
-  // Hasta que no estemos “ready” (validado el token), no renderizamos NADA.
-  if (!ready) {
+  // Mientras no esté "ok", no renderizamos NADA (ni las estadísticas)
+  if (authState !== "ok") {
     return null;
   }
 
+  // Solo cuando authState === "ok" montamos el Dashboard completo
   return (
     <div className="flex min-h-screen">
       <Sidebar />
