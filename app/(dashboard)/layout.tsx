@@ -22,16 +22,18 @@ export default function DashboardLayout({
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
-      // Si no hay token, redirigir a login
+      // Si no hay token, redirige directamente al login
       router.replace("/login");
       return;
     }
-    // Token existe, ya podemos renderizar el dashboard
+    // Sólo cuando confirmamos que hay token, marcamos listo
     setReady(true);
   }, [router]);
 
-  // Mientras verificamos el token, no renderizamos nada
-  if (!ready) return null;
+  // Hasta que no estemos “ready” (validado el token), no renderizamos NADA.
+  if (!ready) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen">
