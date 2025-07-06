@@ -14,14 +14,12 @@ import UsuarioSection from "@/components/sections/UsuarioSection";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  const [mounted, setMounted] = useState(false);
   const [role, setRole] = useState<string | null>(null);
-  const router = useRouter();
   const [isInvited, setIsInvited] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false); // 👈 Clave
+  const router = useRouter();
 
   useEffect(() => {
-    setMounted(true);
-
     const verificarSesion = () => {
       const token = localStorage.getItem("accessToken");
       const storedRole = localStorage.getItem("role");
@@ -32,6 +30,7 @@ export default function Dashboard() {
       }
 
       setRole(storedRole);
+      setAuthChecked(true); // 👈 Ya está verificado
 
       if (storedRole === "ROLE_INVITED") {
         setIsInvited(true);
@@ -48,17 +47,16 @@ export default function Dashboard() {
       }
     };
 
-    const delay = setTimeout(verificarSesion, 100); // 💡 Esperamos 100ms
-
+    const delay = setTimeout(verificarSesion, 100);
     return () => clearTimeout(delay);
   }, [router]);
 
-  if (!mounted) return null;
+  if (!authChecked) return null; // ⛔ No renderizar nada si no hay auth confirmada
 
   return (
     <div className="flex min-h-screen bg-background">
       <div className="flex-1 flex flex-col">
-        <DashboardHeader activeTab={activeTab} />
+        <DashboardHeader />
         {isInvited && (
           <div className="bg-yellow-200 text-yellow-800 text-center p-2 mb-4 rounded">
             Estás usando el CRM como <strong>invitado</strong>. Los datos serán
