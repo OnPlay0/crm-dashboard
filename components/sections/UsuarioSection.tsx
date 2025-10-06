@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { getUsers, createUser, updateUser, deleteUser } from "@/app/lib/users";
-import UserForm from "@/components/user-form";
-import UserTable from "@/components/usert-table";
+import UserForm from "@/components/users/user-form";
+import UserTable from "@/components/users/usert-table";
 import { Usuario, UsuarioForm } from "@/app/lib/types";
 
 export default function UsuarioSection() {

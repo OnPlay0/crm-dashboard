@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://admin:admin123@localhost:27017/creditos?authSource=admin
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,mappings
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: Microservicio de Solicitudes
+    version: 1.0.0
+    author: Charly

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLogin } from "@/app/lib/login";
 import Image from "next/image";
-import { handleGuestLogin } from "@/app/login/handle";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -12,14 +11,15 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const router = useRouter();
-  const { loginRequest } = useLogin(); // ✅ Usás el hook para obtener la función
+  const { loginRequest } = useLogin();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     setErrorMessage("");
 
     try {
-      await loginRequest(username, password); // ✅ Llamás a loginRequest, no al hook
+      await loginRequest(username, password);
+      router.push("/dashboard");
     } catch (error: any) {
       setErrorMessage("Usuario o contraseña incorrectos");
       console.error(error.message);
@@ -27,10 +27,9 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      // lógica opcional
-    }, 2000);
-    return () => clearTimeout(timeout);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
   }, []);
 
   return (
@@ -78,13 +77,12 @@ export default function LoginPage() {
       >
         Entrar
       </button>
-      <button
-        type="button"
-        onClick={() => handleGuestLogin(router)}
-        className="mt-2 w-full bg-gray-700 text-white py-2 px-4 rounded hover:bg-gray-600 transition"
-      >
-        Ingresar como Invitado
-      </button>
+      <p className="text-center text-sm text-gray-400 mt-4">
+        ¿No tenés cuenta?{" "}
+        <a href="/register" className="text-blue-400 hover:underline">
+          Registrate acá
+        </a>
+      </p>
     </form>
   );
 }

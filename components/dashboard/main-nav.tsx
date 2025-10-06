@@ -5,7 +5,7 @@ import type React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 
 export function MainNav({
   className,
@@ -15,37 +15,29 @@ export function MainNav({
 
   const routes = [
     {
-      href: "/",
+      href: "/dashboard",
       label: "Dashboard",
-      active: pathname === "/",
+      active: pathname === "/dashboard",
     },
-
     {
-      href: "/clients",
+      href: "/dashboard/clients",
       label: "Clientes",
-      active: pathname === "/clients",
+      active: pathname === "/dashboard/clients",
     },
-
     {
-      href: "/ventas", // <--- esto debe decir "ventas"
+      href: "/dashboard/ventas",
       label: "Ventas",
-      active: pathname === "/ventas",
-    },
-
-    {
-      href: "/leads",
-      label: "Leads",
-      active: pathname === "/leads",
+      active: pathname === "/dashboard/ventas",
     },
     {
-      href: "/users",
+      href: "/dashboard/users",
       label: "Usuarios",
-      active: pathname === "/users",
+      active: pathname === "/dashboard/users",
     },
     {
-      href: "/services",
+      href: "/dashboard/services",
       label: "Servicios",
-      active: pathname === "/services",
+      active: pathname === "/dashboard/services",
     },
   ];
 

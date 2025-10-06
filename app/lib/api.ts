@@ -1,121 +1,135 @@
+// api.ts
 export const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api";
 
 export function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem("accessToken");
-  return token
-    ? {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      }
-    : {
-        "Content-Type": "application/json",
-      };
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+  const headers: HeadersInit = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
 }
-// 🔐 Verificación global de sesión expirada o rechazada
+
 async function handleAuthError(res: Response) {
-  if (res.status === 401 || res.status === 403) {
-    localStorage.clear();
-    alert(
-      "⏳ Tu sesión ha expirado o fue revocada. Por favor, iniciá sesión nuevamente."
-    );
-    window.location.href = "/login";
-    throw new Error("Sesión inválida o expirada.");
+  if (res.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.clear();
+      alert("⏳ Tu sesión ha expirado. Por favor, iniciá sesión nuevamente.");
+      window.location.href = "/login";
+    }
+    throw Object.assign(new Error("Sesión expirada."), { status: 401 });
+  }
+  if (res.status === 403) {
+    if (typeof window !== "undefined") {
+      alert("🚫 No tenés permisos para acceder a esta sección.");
+    }
+    throw Object.assign(new Error("Acceso prohibido."), { status: 403 });
   }
 }
 
-// 🔍 GET
+const parseBackendError = async (res: Response): Promise<string> => {
+  const text = await res.text();
+  try {
+    const json = JSON.parse(text);
+    return (json.message || json.mensaje || text) as string;
+  } catch {
+    return text;
+  }
+};
+
+// GET tipado
 export async function fetchData<T>(endpoint: string): Promise<T> {
-  // 1) Guardia: si no hay token, aborta aquí
-  const token = localStorage.getItem("accessToken");
-  if (!token) {
-    return Promise.reject("No autenticado");
-  }
-
-  // 2) Construcción de URL
-  const cleanedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const url = `${BASE_URL}${cleanedEndpoint}`;
-  console.log("➡️ URL que se va a fetch:", url);
-
-  // 3) Llamada con headers ya incluyendo Authorization
-  const res = await fetch(url, {
-    method: "GET",
-    headers: getAuthHeaders(),
-  });
-
-  // 4) Manejo de 401/403
+  const url = `${BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+  const res = await fetch(url, { method: "GET", headers: getAuthHeaders() });
   await handleAuthError(res);
-
-  if (!res.ok) {
-    throw new Error(`Error HTTP: ${res.status} - ${res.statusText}`);
-  }
-
-  return res.json();
+  if (!res.ok) throw new Error(await parseBackendError(res));
+  if (res.status === 204) return undefined as unknown as T;
+  return res.json() as Promise<T>;
 }
 
-// ➕ POST
-export const postData = async (endpoint: string, data: any) => {
+// POST tipado
+export const postData = async <T>(endpoint: string, data: any): Promise<T> => {
   const url = `${BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
-  console.log("Posting to:", url);
-  console.log("📦 Payload que se va a enviar:", data);
-
   const res = await fetch(url, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
-
   await handleAuthError(res);
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    console.error("❌ Error detalle del backend:", errorText);
-    try {
-      const json = JSON.parse(errorText);
-      console.error("📄 Error JSON:", json);
-    } catch (e) {
-      console.error("❌ No se pudo parsear el error como JSON");
-    }
-    throw new Error(`Error posting data: ${res.status} ${res.statusText}`);
-  }
-
-  return res.json();
+  if (!res.ok)
+    throw Object.assign(new Error(await parseBackendError(res)), {
+      status: res.status,
+    });
+  return res.json() as Promise<T>;
 };
 
-// ✏️ PUT
-export const putData = async (endpoint: string, data: any) => {
+// PUT tipado
+export const putData = async <T>(endpoint: string, data: any): Promise<T> => {
   const url = `${BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
   const res = await fetch(url, {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
-
   await handleAuthError(res);
-
-  if (!res.ok) {
-    throw new Error(`Error al actualizar: ${res.status} ${res.statusText}`);
-  }
-
-  return res.json();
+  if (!res.ok)
+    throw Object.assign(new Error(await parseBackendError(res)), {
+      status: res.status,
+    });
+  return res.json() as Promise<T>;
 };
 
-// 🗑️ DELETE
+// DELETE
 export const deleteData = async (endpoint: string) => {
-  const cleanedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const url = `${BASE_URL}${cleanedEndpoint}`;
-  console.log("🔗 DELETE URL:", url);
+  const url = `${BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+  const res = await fetch(url, { method: "DELETE", headers: getAuthHeaders() });
+  await handleAuthError(res);
+  if (!res.ok)
+    throw Object.assign(new Error(await parseBackendError(res)), {
+      status: res.status,
+    });
+  return true;
+};
 
+// 👇 NUEVO: descarga de binarios con filename
+export async function fetchBlob(
+  endpoint: string
+): Promise<{ blob: Blob; filename: string }> {
+  const url = `${BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
   const res = await fetch(url, {
-    method: "DELETE",
-    headers: getAuthHeaders(),
+    method: "GET",
+    headers: {
+      Authorization:
+        typeof window !== "undefined"
+          ? `Bearer ${localStorage.getItem("accessToken") || ""}`
+          : "",
+    },
   });
 
   await handleAuthError(res);
+  if (!res.ok) throw new Error(await parseBackendError(res));
 
-  if (!res.ok) {
-    throw new Error(`Error al eliminar: ${res.status} ${res.statusText}`);
-  }
+  // filename (si el servidor expone el header por CORS)
+  let filename = "download";
+  const dispo =
+    res.headers.get("Content-Disposition") ||
+    res.headers.get("content-disposition") ||
+    "";
+  const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/i.exec(dispo);
+  if (match?.[1]) filename = decodeURIComponent(match[1].replace(/['"]/g, ""));
 
-  return true;
-};
+  // MIME correcto (forzamos xlsx si el content-type viene vacío o genérico)
+  const ct =
+    res.headers.get("Content-Type") || res.headers.get("content-type") || "";
+  const isExcel = ct.includes(
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  );
+  const ab = await res.arrayBuffer();
+  const blob = new Blob([ab], {
+    type: isExcel
+      ? ct
+      : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  return { blob, filename };
+}

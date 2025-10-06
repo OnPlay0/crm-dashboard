@@ -30,41 +30,42 @@ export interface Lead {
   notes?: string;
 }
 
-export enum FuenteLead {
-  WEB = "WEB",
-  REFERIDO = "REFERIDO",
-  REDES_SOCIALES = "REDES_SOCIALES",
-  LLAMADA = "LLAMADA",
-  EMAIL = "EMAIL",
-  EVENTO = "EVENTO",
-  OTRO = "OTRO",
-}
-
-export enum EstadoLead {
-  NUEVO = "NUEVO",
-  EN_PROCESO = "EN_PROCESO",
-  CONTACTADO = "CONTACTADO",
-  CALIFICADO = "CALIFICADO",
-  DESCARTADO = "DESCARTADO",
-}
-
-// TIPOS DE LA PAGINA SERVICIOS
-export interface Servicio {
+export type CatalogType = "PRODUCT" | "SERVICE";
+type CatalogItemDTO = {
   id: number;
-  nombre: string;
-  descripcion: string;
-  precio: number;
+  sku?: string | null;
+  name: string;
+  description?: string | null;
+  type: "PRODUCT" | "SERVICE";
+  price?: number | null;
+  category?: string | null;
+  active?: boolean | null;
+  stock?: number | null;
+  createdAt?: string | null;
+};
+
+export interface Servicio {
+  id?: number;
+  name: string; // ✅ consistente con el back
+  description: string;
+  price: number;
+  type?: CatalogType;
+  sku?: string;
+  stock?: number;
+  active?: boolean;
+  category?: string;
 }
 
-// TIPOS DE LA PAGINA VENTAS
+// src/app/lib/types.ts
 export interface Venta {
-  id?: number;
-  cliente: string;
+  id: number;
+  fecha: string;
   descripcion: string;
   monto: number;
-  estado: "NUEVO" | "EN_PROCESO" | "GANADO" | "PERDIDO";
-  fechaCierreEstimada: string;
-  fecha?: string;
+  productName: string; // 👈 nombre a mostrar en columna "Nombre"
+  productType: string; // 👈 tipo a mostrar en columna "Producto"
+  estado: string;
+  cliente?: string;
 }
 
 // Enum de roles posibles
